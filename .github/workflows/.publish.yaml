@@ -1,0 +1,76 @@
+name: Publish Docker image
+run-name: Publish Docker image
+
+on:
+  workflow_call:
+    inputs:
+      context:
+        type: string
+        required: true
+      image-title:
+        type: string
+        required: false
+        default: Docker image title
+      image-description:
+        type: string
+        required: false
+        default: Docker image description
+
+env:
+  REGISTRY: ghcr.io
+  USERNAME: ${{ github.repository_owner }}
+
+jobs:
+  workflow-data:
+    name: Fetch workflow data
+    runs-on: ubuntu-latest
+    outputs:
+      image-name: ${{ steps.image-data.outputs.name }}
+      image-version: ${{ steps.image-data.outputs.version }}
+
+    steps:
+      - name: Fetch image data
+        id: image-data
+        run: |
+          echo "name=${GITHUB_REF_NAME%-*}" >> $GITHUB_OUTPUT
+          echo "version=${GITHUB_REF_NAME##*-}" >> $GITHUB_OUTPUT
+
+  publish:
+    name: Publish Docker image
+    runs-on: ubuntu-latest
+    needs: workflow-data
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to the registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ env.USERNAME }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: metadata
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.USERNAME }}/${{ needs.workflow-data.outputs.image-name }}
+          labels: |
+            org.opencontainers.image.title=${{ inputs.image-title }}
+            org.opencontainers.image.description=${{ inputs.image-description }}
+            org.opencontainers.image.version=${{ needs.workflow-data.outputs.image-version }}
+          tags: |
+            type=raw,value=${{ needs.workflow-data.outputs.image-version }}
+            type=raw,value=latest
+
+      - name: Build and push image
+        uses: docker/build-push-action@v4
+        with:
+          context: ${{ inputs.context }}
+          push: true
+          labels: ${{ steps.metadata.outputs.labels }}
+          tags: ${{ steps.metadata.outputs.tags }}

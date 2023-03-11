@@ -1,0 +1,19 @@
+name: Android SDK tools
+run-name: Android SDK tools
+
+on:
+  push:
+    tags:
+      - android-sdk-tools-[0-9]+.[0-9]+.[0-9]+
+
+jobs:
+  publish:
+    name: Publish Android SDK tools
+    uses: ./.github/workflows/.publish.yaml
+    with:
+      context: android/sdk-tools
+      image-title: Android SDK tools
+      image-description: Android SDK command line and platform tools
+    permissions:
+      contents: read
+      packages: write
