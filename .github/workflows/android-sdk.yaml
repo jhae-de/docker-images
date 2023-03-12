@@ -1,0 +1,31 @@
+name: Android SDK
+run-name: Android SDK
+
+on:
+  push:
+    tags:
+      - android-sdk-[0-9]+
+
+jobs:
+  workflow-data:
+    name: Fetch workflow data
+    runs-on: ubuntu-latest
+    outputs:
+      context-version: ${{ steps.context-data.outputs.version }}
+
+    steps:
+      - name: Fetch context data
+        id: context-data
+        run: echo "version=${GITHUB_REF_NAME##*-}" >> $GITHUB_OUTPUT
+
+  publish:
+    name: Publish Android SDK
+    needs: workflow-data
+    uses: ./.github/workflows/.publish.yaml
+    with:
+      context: android/sdk-${{ needs.workflow-data.outputs.context-version }}
+      image-title: Android SDK
+      image-description: Android SDK
+    permissions:
+      contents: read
+      packages: write
