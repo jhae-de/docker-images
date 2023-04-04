@@ -1,0 +1,19 @@
+name: Electron wrapper
+run-name: Electron wrapper
+
+on:
+  push:
+    tags:
+      - electron-wrapper-[0-9]+.[0-9]+.[0-9]+
+
+jobs:
+  publish:
+    name: Publish Electron wrapper
+    uses: ./.github/workflows/.publish.yaml
+    with:
+      context: electron-wrapper
+      image-title: Electron wrapper
+      image-description: Electron wrapper
+    permissions:
+      contents: read
+      packages: write
