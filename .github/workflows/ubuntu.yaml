@@ -1,0 +1,42 @@
+name: Ubuntu
+run-name: Ubuntu
+
+on:
+  workflow_dispatch:
+    inputs:
+      image-version:
+        description: Ubuntu version
+        type: choice
+        options:
+          - '22.04 LTS (Jammy Jellyfish)'
+        required: true
+        default: '22.04 LTS (Jammy Jellyfish)'
+
+jobs:
+  workflow-data:
+    name: Set workflow data
+    runs-on: ubuntu-latest
+    outputs:
+      image-version: ${{ steps.workflow-data.outputs.image-version }}
+
+    steps:
+      - name: Set workflow data
+        id: workflow-data
+        run: echo "image-version=$(echo "${{ inputs.image-version }}" | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+  publish:
+    name: Publish Ubuntu
+    needs: workflow-data
+    uses: ./.github/workflows/.publish.yaml
+    with:
+      context: ./ubuntu
+      dockerfile: ./ubuntu/Dockerfile
+      build-args: UBUNTU_VERSION=${{ needs.workflow-data.outputs.image-version }}
+      image-name: ubuntu
+      image-title: Ubuntu
+      image-description: Ubuntu
+      image-version: ${{ needs.workflow-data.outputs.image-version }}
+      is-latest: ${{ needs.workflow-data.outputs.image-version == '22.04' && true || false }}
+    permissions:
+      contents: read
+      packages: write

@@ -1,0 +1,90 @@
+name: Publish Docker image
+run-name: Publish Docker image
+
+on:
+  workflow_call:
+    inputs:
+      context:
+        type: string
+        required: false
+        default: ./
+      dockerfile:
+        type: string
+        required: false
+        default: ./Dockerfile
+      build-args:
+        type: string
+        required: false
+      image-name:
+        type: string
+        required: true
+      image-title:
+        type: string
+        required: false
+      image-description:
+        type: string
+        required: false
+      image-version:
+        type: string
+        required: true
+      image-code-name:
+        type: string
+        required: false
+      release-version:
+        type: string
+        required: false
+      is-latest:
+        type: boolean
+        required: false
+        default: false
+
+env:
+  REGISTRY: ghcr.io
+  USERNAME: ${{ github.repository_owner }}
+
+jobs:
+  publish:
+    name: Publish docker image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ env.USERNAME }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: metadata
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.USERNAME }}/${{ inputs.image-name }}
+          labels: |
+            org.opencontainers.image.title=${{ inputs.image-title }}
+            org.opencontainers.image.description=${{ inputs.image-description }}
+            org.opencontainers.image.version=${{ inputs.image-version }}
+          tags: |
+            type=raw,value=${{ inputs.image-code-name == '' && inputs.image-version || '' }}
+            type=raw,value=${{ inputs.image-code-name == '' && inputs.image-version || '' }}${{ (inputs.image-code-name == '' && inputs.release-version) && format('-{0}', inputs.release-version) || '' }}
+            type=raw,value=${{ inputs.image-version }}${{ inputs.image-code-name && format('-{0}', inputs.image-code-name) || '' }}
+            type=raw,value=${{ inputs.image-version }}${{ inputs.image-code-name && format('-{0}', inputs.image-code-name) || '' }}${{ inputs.release-version && format('-{0}', inputs.release-version) || '' }}
+            type=raw,value=${{ inputs.image-code-name }}
+            type=raw,value=${{ inputs.image-code-name }}${{ (inputs.image-code-name  && inputs.release-version) && format('-{0}', inputs.release-version) || '' }}
+            type=raw,value=${{ inputs.is-latest && 'latest' || '' }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ inputs.context }}
+          file: ${{ inputs.dockerfile }}
+          build-args: ${{ inputs.build-args }}
+          labels: ${{ steps.metadata.outputs.labels }}
+          tags: ${{ steps.metadata.outputs.tags }}
+          push: true
