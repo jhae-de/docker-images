@@ -1,0 +1,69 @@
+name: Node
+run-name: Node
+
+on:
+  workflow_dispatch:
+    inputs:
+      ubuntu-version:
+        description: Ubuntu version
+        type: choice
+        options:
+          - 'latest'
+          - '22.04 LTS (Jammy Jellyfish)'
+        required: true
+        default: 'latest'
+      nvm-version:
+        description: NVM version
+        type: string
+        required: true
+        default: '0.39.5'
+      node-version:
+        description: Node version
+        type: string
+        required: true
+        default: '18.18.2'
+      is-latest:
+        description: Latest
+        type: boolean
+        required: true
+        default: false
+
+jobs:
+  workflow-data:
+    name: Set workflow data
+    runs-on: ubuntu-latest
+    outputs:
+      ubuntu-version: ${{ steps.workflow-data.outputs.ubuntu-version }}
+      image-version: ${{ steps.workflow-data.outputs.image-version }}
+      image-code-name: ${{ steps.workflow-data.outputs.image-code-name }}
+
+    steps:
+      - name: Set workflow data
+        id: workflow-data
+        run: |
+          echo "ubuntu-version=$(echo "${{ inputs.ubuntu-version }}" | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+          echo "image-version=$(echo "${{ inputs.node-version }}" | cut -d. -f1)" >> $GITHUB_OUTPUT
+          if [ "${{ inputs.ubuntu-version }}" == "22.04 LTS (Jammy Jellyfish)" ]; then
+            echo "image-code-name=jammy" >> $GITHUB_OUTPUT
+          fi
+
+  publish:
+    name: Publish Node
+    needs: workflow-data
+    uses: ./.github/workflows/.publish.yaml
+    with:
+      context: ./node
+      dockerfile: ./node/Dockerfile
+      build-args: |
+        UBUNTU_VERSION=${{ needs.workflow-data.outputs.ubuntu-version }}
+        NVM_VERSION=${{ inputs.nvm-version }}
+        NODE_VERSION=${{ inputs.node-version }}
+      image-name: node
+      image-title: Node
+      image-description: Node
+      image-version: ${{ needs.workflow-data.outputs.image-version }}
+      image-code-name: ${{ needs.workflow-data.outputs.image-code-name }}
+      is-latest: ${{ inputs.is-latest }}
+    permissions:
+      contents: read
+      packages: write
