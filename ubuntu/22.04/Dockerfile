@@ -11,7 +11,7 @@ ENV DOCKER_HOMEDIR=${DOCKER_HOMEDIR}
 ENV DOCKER_WORKDIR=${DOCKER_WORKDIR}
 
 RUN if ! id -u "${DOCKER_USER}" >/dev/null 2>&1; then \
-      adduser ${DOCKER_USER} --home ${DOCKER_HOMEDIR}; \
+        adduser ${DOCKER_USER} --home ${DOCKER_HOMEDIR}; \
     fi
 
 COPY ./.docker/append-history.sh /etc/profile.d/00-append-history.sh

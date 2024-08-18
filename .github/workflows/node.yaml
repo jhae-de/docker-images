@@ -9,6 +9,7 @@ on:
         type: choice
         options:
           - 'latest'
+          - '24.04 LTS (Noble Numbat)'
           - '22.04 LTS (Jammy Jellyfish)'
         required: true
         default: 'latest'
@@ -16,12 +17,12 @@ on:
         description: NVM version
         type: string
         required: true
-        default: '0.39.5'
+        default: '0.39.7'
       node-version:
         description: Node version
         type: string
         required: true
-        default: '18.18.2'
+        default: '20.16.0'
       is-latest:
         description: Latest
         type: boolean
@@ -43,7 +44,9 @@ jobs:
         run: |
           echo "ubuntu-version=$(echo "${{ inputs.ubuntu-version }}" | cut -d' ' -f1)" >> $GITHUB_OUTPUT
           echo "image-version=$(echo "${{ inputs.node-version }}" | cut -d. -f1)" >> $GITHUB_OUTPUT
-          if [ "${{ inputs.ubuntu-version }}" == "22.04 LTS (Jammy Jellyfish)" ]; then
+          if [ "${{ inputs.ubuntu-version }}" == "24.04 LTS (Noble Numbat)" ]; then
+            echo "image-code-name=noble" >> $GITHUB_OUTPUT
+          elif [ "${{ inputs.ubuntu-version }}" == "22.04 LTS (Jammy Jellyfish)" ]; then
             echo "image-code-name=jammy" >> $GITHUB_OUTPUT
           fi
 

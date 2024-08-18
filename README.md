@@ -8,6 +8,7 @@ Ubuntu website: https://ubuntu.com
 | Version | Description                   |
 |---------|-------------------------------|
 | latest  | The latest LTS version        |
+| 24.04   | 24.04.* LTS (Noble Numbat)    |
 | 22.04   | 22.04.* LTS (Jammy Jellyfish) |
 
 ***
@@ -23,6 +24,8 @@ Node website: https://nodejs.org
 |----------|-------------------------|--------------------------------------|
 | latest   | The latest Node version | Ubuntu latest                        |
 | xx       | A specific Node version | Ubuntu latest                        |
+| noble    | The latest Node version | Ubuntu 24.04.* LTS (Noble Numbat)    |
+| xx-noble | A specific Node version | Ubuntu 24.04.* LTS (Noble Numbat)    |
 | jammy    | The latest Node version | Ubuntu 22.04.* LTS (Jammy Jellyfish) |
 | xx-jammy | A specific Node version | Ubuntu 22.04.* LTS (Jammy Jellyfish) |
 
