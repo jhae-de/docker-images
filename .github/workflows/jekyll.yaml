@@ -8,12 +8,12 @@ on:
         description: Jekyll version
         type: string
         required: true
-        default: '4.3.2'
+        default: '4.3.3'
       bundler-version:
         description: Bundler version
         type: string
         required: true
-        default: '2.4.20'
+        default: '2.5.17'
       is-latest:
         description: Latest
         type: boolean

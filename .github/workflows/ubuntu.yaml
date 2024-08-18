@@ -8,9 +8,10 @@ on:
         description: Ubuntu version
         type: choice
         options:
+          - '24.04 LTS (Noble Numbat)'
           - '22.04 LTS (Jammy Jellyfish)'
         required: true
-        default: '22.04 LTS (Jammy Jellyfish)'
+        default: '24.04 LTS (Noble Numbat)'
 
 jobs:
   workflow-data:
@@ -36,7 +37,7 @@ jobs:
       image-title: Ubuntu
       image-description: Ubuntu
       image-version: ${{ needs.workflow-data.outputs.image-version }}
-      is-latest: ${{ needs.workflow-data.outputs.image-version == '22.04' && true || false }}
+      is-latest: ${{ needs.workflow-data.outputs.image-version == '24.04' && true || false }}
     permissions:
       contents: read
       packages: write
