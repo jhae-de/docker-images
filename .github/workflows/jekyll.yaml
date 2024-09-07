@@ -13,7 +13,7 @@ on:
         description: Bundler version
         type: string
         required: true
-        default: '2.5.17'
+        default: '2.5.18'
       is-latest:
         description: Latest
         type: boolean
@@ -32,7 +32,7 @@ jobs:
         BUNDLER_VERSION=${{ inputs.bundler-version }}
       image-name: jekyll
       image-title: Jekyll
-      image-description: Jekyll
+      image-description: Jekyll ${{ inputs.jekyll-version }} with Bundler ${{ inputs.bundler-version }}
       image-version: ${{ inputs.jekyll-version }}
       is-latest: ${{ inputs.is-latest }}
     permissions:

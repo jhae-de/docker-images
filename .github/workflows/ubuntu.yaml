@@ -35,7 +35,7 @@ jobs:
       build-args: UBUNTU_VERSION=${{ needs.workflow-data.outputs.image-version }}
       image-name: ubuntu
       image-title: Ubuntu
-      image-description: Ubuntu
+      image-description: Ubuntu ${{ inputs.image-version }}
       image-version: ${{ needs.workflow-data.outputs.image-version }}
       is-latest: ${{ needs.workflow-data.outputs.image-version == '24.04' && true || false }}
     permissions:

@@ -22,7 +22,7 @@ on:
         description: Node version
         type: string
         required: true
-        default: '20.16.0'
+        default: '20.17.0'
       is-latest:
         description: Latest
         type: boolean
@@ -63,7 +63,7 @@ jobs:
         NODE_VERSION=${{ inputs.node-version }}
       image-name: node
       image-title: Node
-      image-description: Node
+      image-description: Node ${{ inputs.node-version }}
       image-version: ${{ needs.workflow-data.outputs.image-version }}
       image-code-name: ${{ needs.workflow-data.outputs.image-code-name }}
       is-latest: ${{ inputs.is-latest }}
