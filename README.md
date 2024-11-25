@@ -45,7 +45,7 @@ Bundler website: https://bundler.io
 | Version | Description               | Base image  |
 |---------|---------------------------|-------------|
 | latest  | The latest Jekyll version | Node latest |
-| x.x.\*  | A specific Jekyll version | Node latest |
+| x.x.x   | A specific Jekyll version | Node latest |
 
 Build a new version by running
 the [Jekyll workflow](https://github.com/jhae-de/docker-images/actions/workflows/jekyll.yaml).

@@ -22,7 +22,7 @@ on:
         description: Node version
         type: string
         required: true
-        default: '20.17.0'
+        default: '22.11.0'
       is-latest:
         description: Latest
         type: boolean
