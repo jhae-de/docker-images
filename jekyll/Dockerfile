@@ -1,4 +1,6 @@
-FROM ghcr.io/jhae-de/node:latest
+ARG NODE_VERSION=latest
+
+FROM ghcr.io/jhae-de/node:${NODE_VERSION}
 
 ARG JEKYLL_VERSION=4.3.4
 ARG BUNDLER_VERSION=2.5.23

@@ -4,6 +4,16 @@ run-name: Jekyll
 on:
   workflow_dispatch:
     inputs:
+      node-version:
+        description: Node version
+        type: choice
+        options:
+          - 'latest'
+          - '22'
+          - '20'
+          - '18'
+        required: true
+        default: 'latest'
       jekyll-version:
         description: Jekyll version
         type: string
@@ -28,12 +38,14 @@ jobs:
       context: ./jekyll
       dockerfile: ./jekyll/Dockerfile
       build-args: |
+        NODE_VERSION=${{ inputs.node-version }}
         JEKYLL_VERSION=${{ inputs.jekyll-version }}
         BUNDLER_VERSION=${{ inputs.bundler-version }}
       image-name: jekyll
       image-title: Jekyll
       image-description: Jekyll ${{ inputs.jekyll-version }} with Bundler ${{ inputs.bundler-version }}
       image-version: ${{ inputs.jekyll-version }}
+      image-code-name: ${{ inputs.node-version != 'latest' && inputs.node-version || '' }}
       is-latest: ${{ inputs.is-latest }}
     permissions:
       contents: read

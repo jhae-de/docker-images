@@ -42,10 +42,11 @@ Package: [jekyll](https://github.com/jhae-de/docker-images/pkgs/container/jekyll
 Jekyll website: https://jekyllrb.com  
 Bundler website: https://bundler.io
 
-| Version | Description               | Base image  |
-|---------|---------------------------|-------------|
-| latest  | The latest Jekyll version | Node latest |
-| x.x.x   | A specific Jekyll version | Node latest |
+| Version  | Description               | Base image  |
+|----------|---------------------------|-------------|
+| latest   | The latest Jekyll version | Node latest |
+| x.x.x    | A specific Jekyll version | Node latest |
+| x.x.x-xx | A specific Jekyll version | Node xx     |
 
 Build a new version by running
 the [Jekyll workflow](https://github.com/jhae-de/docker-images/actions/workflows/jekyll.yaml).
