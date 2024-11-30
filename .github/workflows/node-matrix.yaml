@@ -1,0 +1,38 @@
+name: Node Matrix
+run-name: Node Matrix
+
+on:
+  workflow_dispatch:
+    inputs:
+      nvm-version:
+        description: NVM version
+        type: string
+        required: true
+        default: '0.39.7'
+
+jobs:
+  publish:
+    name: Publish Node
+    uses: ./.github/workflows/.publish.yaml
+    strategy:
+      matrix:
+        node: ${{ fromJSON(vars.NODE_VERSIONS) }}
+        ubuntu: ${{ fromJSON(vars.UBUNTU_VERSIONS) }}
+      max-parallel: 1
+    with:
+      context: ./node
+      dockerfile: ./node/Dockerfile
+      build-args: |
+        UBUNTU_VERSION=${{ matrix.ubuntu.version }}
+        NODE_VERSION=${{ matrix.node.version }}
+        NVM_VERSION=${{ inputs.nvm-version }}
+      image-name: node
+      image-title: Node
+      image-description: ${{ matrix.node.image-name }} on ${{ matrix.ubuntu.image-name || 'Ubuntu LTS (latest)' }}
+      image-version: ${{ matrix.node.image-version }}
+      image-code-name: ${{ matrix.ubuntu.image-code-name || '' }}
+      is-latest: ${{ (matrix.node.is-latest && matrix.ubuntu.version == 'latest') && true || false }}
+      is-skipped: ${{ matrix.node.version == 'latest' && true || false }}
+    permissions:
+      contents: read
+      packages: write

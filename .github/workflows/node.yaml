@@ -13,16 +13,16 @@ on:
           - '22.04 LTS (Jammy Jellyfish)'
         required: true
         default: 'latest'
-      nvm-version:
-        description: NVM version
-        type: string
-        required: true
-        default: '0.39.7'
       node-version:
         description: Node version
         type: string
         required: true
         default: '22.11.0'
+      nvm-version:
+        description: NVM version
+        type: string
+        required: true
+        default: '0.39.7'
       is-latest:
         description: Latest
         type: boolean
@@ -59,13 +59,13 @@ jobs:
       dockerfile: ./node/Dockerfile
       build-args: |
         UBUNTU_VERSION=${{ needs.workflow-data.outputs.ubuntu-version }}
-        NVM_VERSION=${{ inputs.nvm-version }}
         NODE_VERSION=${{ inputs.node-version }}
+        NVM_VERSION=${{ inputs.nvm-version }}
       image-name: node
       image-title: Node
-      image-description: Node ${{ inputs.node-version }}
+      image-description: Node ${{ inputs.node-version }} on ${{ inputs.ubuntu-version != 'latest' && format('Ubuntu {0]', inputs.ubuntu-version) || 'Ubuntu LTS (latest)' }}
       image-version: ${{ needs.workflow-data.outputs.image-version }}
-      image-code-name: ${{ needs.workflow-data.outputs.image-code-name }}
+      image-code-name: ${{ needs.workflow-data.outputs.image-code-name || '' }}
       is-latest: ${{ inputs.is-latest }}
     permissions:
       contents: read

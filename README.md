@@ -27,15 +27,17 @@ Node website: https://nodejs.org
 
 | Version  | Description             | Base image                           |
 |----------|-------------------------|--------------------------------------|
-| latest   | The latest Node version | Ubuntu latest                        |
-| xx       | A specific Node version | Ubuntu latest                        |
+| latest   | The latest Node version | Ubuntu LTS (latest)                  |
+| xx       | A specific Node version | Ubuntu LTS (latest)                  |
 | noble    | The latest Node version | Ubuntu 24.04.* LTS (Noble Numbat)    |
 | xx-noble | A specific Node version | Ubuntu 24.04.* LTS (Noble Numbat)    |
 | jammy    | The latest Node version | Ubuntu 22.04.* LTS (Jammy Jellyfish) |
 | xx-jammy | A specific Node version | Ubuntu 22.04.* LTS (Jammy Jellyfish) |
 
-Build a new version by running
-the [Node workflow](https://github.com/jhae-de/docker-images/actions/workflows/node.yaml).
+Build a specific version by running the
+[Node workflow](https://github.com/jhae-de/docker-images/actions/workflows/node.yaml).  
+Build all versions by running the
+[Node Matrix workflow](https://github.com/jhae-de/docker-images/actions/workflows/node-matrix.yaml).
 
 ***
 
