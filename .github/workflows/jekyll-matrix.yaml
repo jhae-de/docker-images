@@ -1,0 +1,37 @@
+name: Jekyll Matrix
+run-name: Jekyll Matrix
+
+on:
+  workflow_dispatch:
+    inputs:
+      bundler-version:
+        description: Bundler version
+        type: string
+        required: true
+        default: '2.5.23'
+
+jobs:
+  publish:
+    name: Publish Jekyll
+    uses: ./.github/workflows/.publish.yaml
+    strategy:
+      matrix:
+        jekyll: ${{ fromJSON(vars.JEKYLL_VERSIONS) }}
+        node: ${{ fromJSON(vars.NODE_VERSIONS) }}
+      max-parallel: 1
+    with:
+      context: ./jekyll
+      dockerfile: ./jekyll/Dockerfile
+      build-args: |
+        NODE_VERSION=${{ matrix.node.image-version }}
+        JEKYLL_VERSION=${{ matrix.jekyll.version }}
+        BUNDLER_VERSION=${{ inputs.bundler-version }}
+      image-name: jekyll
+      image-title: Jekyll
+      image-description: ${{ matrix.jekyll.image-name }} with Bundler ${{ inputs.bundler-version }}
+      image-version: ${{ matrix.node.image-version != 'latest' && format('{0}-{1}', matrix.jekyll.image-version, matrix.node.image-version) || matrix.jekyll.image-version }}
+      is-latest: ${{ (matrix.jekyll.is-latest && matrix.node.version == 'latest') && true || false }}
+      is-skipped: ${{ matrix.jekyll.version == 'latest' && true || false }}
+    permissions:
+      contents: read
+      packages: write

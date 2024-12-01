@@ -55,5 +55,7 @@ Bundler website: https://bundler.io
 | x.x.x    | A specific Jekyll version | Node latest |
 | x.x.x-xx | A specific Jekyll version | Node xx     |
 
-Build a new version by running
-the [Jekyll workflow](https://github.com/jhae-de/docker-images/actions/workflows/jekyll.yaml).
+Build a specific version by running the
+[Jekyll workflow](https://github.com/jhae-de/docker-images/actions/workflows/jekyll.yaml).  
+Build all versions by running the
+[Jekyll Matrix workflow](https://github.com/jhae-de/docker-images/actions/workflows/jekyll-matrix.yaml).
