@@ -5,11 +5,16 @@
 Package: [ubuntu](https://github.com/jhae-de/docker-images/pkgs/container/ubuntu)  
 Ubuntu website: https://ubuntu.com
 
-| Version | Description                   |
-|---------|-------------------------------|
-| latest  | The latest LTS version        |
-| 24.04   | 24.04.* LTS (Noble Numbat)    |
-| 22.04   | 22.04.* LTS (Jammy Jellyfish) |
+| Version | Description                          |
+|---------|--------------------------------------|
+| latest  | The latest Ubuntu LTS version        |
+| 24.04   | Ubuntu 24.04.* LTS (Noble Numbat)    |
+| 22.04   | Ubuntu 22.04.* LTS (Jammy Jellyfish) |
+
+Build a specific version by running the
+[Ubuntu workflow](https://github.com/jhae-de/docker-images/actions/workflows/ubuntu.yaml).  
+Build all versions by running the
+[Ubuntu Matrix workflow](https://github.com/jhae-de/docker-images/actions/workflows/ubuntu-matrix.yaml).
 
 ***
 

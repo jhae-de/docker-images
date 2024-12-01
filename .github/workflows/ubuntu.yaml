@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       image-version: ${{ steps.workflow-data.outputs.image-version }}
+      is-latest: ${{ steps.workflow-data.outputs.image-version == '24.04' && true || false }}
 
     steps:
       - name: Set workflow data
@@ -37,7 +38,7 @@ jobs:
       image-title: Ubuntu
       image-description: Ubuntu ${{ inputs.image-version }}
       image-version: ${{ needs.workflow-data.outputs.image-version }}
-      is-latest: ${{ needs.workflow-data.outputs.image-version == '24.04' && true || false }}
+      is-latest: ${{ needs.workflow-data.outputs.is-latest }}
     permissions:
       contents: read
       packages: write

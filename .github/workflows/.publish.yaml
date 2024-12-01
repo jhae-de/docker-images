@@ -37,6 +37,10 @@ on:
         type: boolean
         required: false
         default: false
+      is-skipped:
+        type: boolean
+        required: false
+        default: false
 
 env:
   REGISTRY: ghcr.io
@@ -44,7 +48,8 @@ env:
 
 jobs:
   publish:
-    name: Publish docker image
+    name: Publish Docker image
+    if: inputs.is-skipped == false
     runs-on: ubuntu-latest
     permissions:
       contents: read

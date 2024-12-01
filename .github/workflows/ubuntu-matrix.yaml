@@ -1,0 +1,27 @@
+name: Ubuntu Matrix
+run-name: Ubuntu Matrix
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: Publish Ubuntu
+    uses: ./.github/workflows/.publish.yaml
+    strategy:
+      matrix:
+        ubuntu: ${{ fromJSON(vars.UBUNTU_VERSIONS) }}
+      max-parallel: 1
+    with:
+      context: ./ubuntu
+      dockerfile: ./ubuntu/${{ matrix.ubuntu.version }}/Dockerfile
+      build-args: UBUNTU_VERSION=${{ matrix.ubuntu.version }}
+      image-name: ubuntu
+      image-title: Ubuntu
+      image-description: ${{ matrix.ubuntu.image-name }}
+      image-version: ${{ matrix.ubuntu.image-version }}
+      is-latest: ${{ matrix.ubuntu.is-latest && true || false }}
+      is-skipped: ${{ matrix.ubuntu.version == 'latest' && true || false }}
+    permissions:
+      contents: read
+      packages: write
