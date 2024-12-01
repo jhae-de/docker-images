@@ -1,0 +1,28 @@
+name: Delete untagged versions
+run-name: Delete untagged versions
+
+on:
+  workflow_dispatch:
+
+jobs:
+  delete-untagged-versions:
+    name: Delete untagged versions
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package:
+          - name: ubuntu
+          - name: node
+          - name: jekyll
+      max-parallel: 1
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Delete untagged versions
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: ${{ matrix.package.name }}
+          package-type: container
+          delete-only-untagged-versions: true
