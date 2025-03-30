@@ -18,7 +18,7 @@ on:
         description: Jekyll version
         type: string
         required: true
-        default: '4.3.4'
+        default: '4.4.1'
       bundler-version:
         description: Bundler version
         type: string
