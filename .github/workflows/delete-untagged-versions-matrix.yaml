@@ -1,0 +1,22 @@
+name: Delete Untagged Versions Matrix
+run-name: Delete Untagged Versions Matrix
+
+on:
+  workflow_dispatch:
+
+jobs:
+  delete-untagged-versions:
+    name: Delete untagged versions
+    uses: ./.github/workflows/delete-untagged-versions.yaml
+    strategy:
+      matrix:
+        package:
+          - name: ubuntu
+          - name: node
+          - name: jekyll
+      max-parallel: 1
+    with:
+      package-name: ${{ matrix.package.name }}
+    permissions:
+      contents: read
+      packages: write

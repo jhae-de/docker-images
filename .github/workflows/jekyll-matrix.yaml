@@ -35,3 +35,13 @@ jobs:
     permissions:
       contents: read
       packages: write
+
+  delete-untagged-versions:
+    name: Delete untagged versions
+    needs: publish
+    uses: ./.github/workflows/delete-untagged-versions.yaml
+    with:
+      package-name: jekyll
+    permissions:
+      contents: read
+      packages: write

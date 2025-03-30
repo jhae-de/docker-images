@@ -25,3 +25,13 @@ jobs:
     permissions:
       contents: read
       packages: write
+
+  delete-untagged-versions:
+    name: Delete untagged versions
+    needs: publish
+    uses: ./.github/workflows/delete-untagged-versions.yaml
+    with:
+      package-name: ubuntu
+    permissions:
+      contents: read
+      packages: write
