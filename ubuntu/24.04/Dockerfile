@@ -10,6 +10,8 @@ ENV DOCKER_USER=${DOCKER_USER}
 ENV DOCKER_HOMEDIR=${DOCKER_HOMEDIR}
 ENV DOCKER_WORKDIR=${DOCKER_WORKDIR}
 
+COPY ./.docker/append-history.sh /etc/profile.d/00-append-history.sh
+
 RUN apt-get update; \
     apt-get --yes dist-upgrade; \
     if ! id -u "${DOCKER_USER}" >/dev/null 2>&1; then \
@@ -19,13 +21,9 @@ RUN apt-get update; \
         apt-get --yes purge adduser perl; \
     fi; \
     apt-get --yes autoremove; \
-    apt-get clean;
-
-COPY ./.docker/append-history.sh /etc/profile.d/00-append-history.sh
+    apt-get clean; \
+    cp /etc/skel/.bashrc ${DOCKER_HOMEDIR}/.bashrc; \
+    echo "source /etc/profile.d/00-append-history.sh" >> ${DOCKER_HOMEDIR}/.bashrc;
 
 USER ${DOCKER_USER}
 WORKDIR ${DOCKER_WORKDIR}
-
-RUN echo "alias ll='ls -alF'" >> ${DOCKER_HOMEDIR}/.bash_aliases; \
-    echo "alias la='ls -A'" >> ${DOCKER_HOMEDIR}/.bash_aliases; \
-    echo "alias l='ls -CF'" >> ${DOCKER_HOMEDIR}/.bash_aliases;
