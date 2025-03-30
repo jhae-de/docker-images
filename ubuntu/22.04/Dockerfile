@@ -16,6 +16,7 @@ RUN apt-get update; \
     apt-get --yes dist-upgrade; \
     apt-get --yes autoremove; \
     apt-get clean; \
+    rm -rf /var/lib/apt/lists/*; \
     if ! id -u "${DOCKER_USER}" >/dev/null 2>&1; then \
         adduser ${DOCKER_USER} --home ${DOCKER_HOMEDIR}; \
     fi; \

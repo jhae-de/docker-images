@@ -22,6 +22,7 @@ RUN apt-get update; \
     fi; \
     apt-get --yes autoremove; \
     apt-get clean; \
+    rm -rf /var/lib/apt/lists/*; \
     cp /etc/skel/.bashrc ${DOCKER_HOMEDIR}/.bashrc; \
     echo "source /etc/profile.d/00-append-history.sh" >> ${DOCKER_HOMEDIR}/.bashrc;
 
