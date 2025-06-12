@@ -31,8 +31,8 @@ jobs:
     needs: workflow-data
     uses: ./.github/workflows/.publish.yaml
     with:
-      context: ./ubuntu
-      dockerfile: ./ubuntu/${{ needs.workflow-data.outputs.image-version }}/Dockerfile
+      context: ./images/ubuntu
+      dockerfile: ./images/ubuntu/${{ needs.workflow-data.outputs.image-version }}/Dockerfile
       build-args: UBUNTU_VERSION=${{ needs.workflow-data.outputs.image-version }}
       image-name: ubuntu
       image-title: Ubuntu

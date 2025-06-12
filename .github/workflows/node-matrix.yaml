@@ -20,8 +20,8 @@ jobs:
         ubuntu: ${{ fromJSON(vars.UBUNTU_VERSIONS) }}
       max-parallel: 1
     with:
-      context: ./node
-      dockerfile: ./node/Dockerfile
+      context: ./images/node
+      dockerfile: ./images/node/Dockerfile
       build-args: |
         UBUNTU_VERSION=${{ matrix.ubuntu.version }}
         NODE_VERSION=${{ matrix.node.version }}

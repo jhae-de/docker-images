@@ -35,8 +35,8 @@ jobs:
     name: Publish Jekyll
     uses: ./.github/workflows/.publish.yaml
     with:
-      context: ./jekyll
-      dockerfile: ./jekyll/Dockerfile
+      context: ./images/jekyll
+      dockerfile: ./images/jekyll/Dockerfile
       build-args: |
         NODE_VERSION=${{ inputs.node-version }}
         JEKYLL_VERSION=${{ inputs.jekyll-version }}

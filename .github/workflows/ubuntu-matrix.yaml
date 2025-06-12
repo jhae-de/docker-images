@@ -13,8 +13,8 @@ jobs:
         ubuntu: ${{ fromJSON(vars.UBUNTU_VERSIONS) }}
       max-parallel: 1
     with:
-      context: ./ubuntu
-      dockerfile: ./ubuntu/${{ matrix.ubuntu.version }}/Dockerfile
+      context: ./images/ubuntu
+      dockerfile: ./images/ubuntu/${{ matrix.ubuntu.version }}/Dockerfile
       build-args: UBUNTU_VERSION=${{ matrix.ubuntu.version }}
       image-name: ubuntu
       image-title: Ubuntu

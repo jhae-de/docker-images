@@ -20,8 +20,8 @@ jobs:
         node: ${{ fromJSON(vars.NODE_VERSIONS) }}
       max-parallel: 1
     with:
-      context: ./jekyll
-      dockerfile: ./jekyll/Dockerfile
+      context: ./images/jekyll
+      dockerfile: ./images/jekyll/Dockerfile
       build-args: |
         NODE_VERSION=${{ matrix.node.image-version }}
         JEKYLL_VERSION=${{ matrix.jekyll.version }}

@@ -55,8 +55,8 @@ jobs:
     needs: workflow-data
     uses: ./.github/workflows/.publish.yaml
     with:
-      context: ./node
-      dockerfile: ./node/Dockerfile
+      context: ./images/node
+      dockerfile: ./images/node/Dockerfile
       build-args: |
         UBUNTU_VERSION=${{ needs.workflow-data.outputs.ubuntu-version }}
         NODE_VERSION=${{ inputs.node-version }}
