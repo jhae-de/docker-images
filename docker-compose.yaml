@@ -1,0 +1,11 @@
+services:
+  app:
+    image: ghcr.io/jhae-de/node:22
+    container_name: ${COMPOSE_PROJECT_NAME:-docker-images}-app
+    environment:
+      HISTFILE: /home/user/workspace/.bash-history
+    working_dir: /home/user/workspace
+    volumes:
+      - ./:/home/user/workspace
+    stdin_open: true
+    tty: true

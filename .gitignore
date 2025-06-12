@@ -1,2 +1,8 @@
 # IDE
 /.idea/
+
+# Project
+/coverage/
+/node_modules/
+/.bash-history
+/.env
