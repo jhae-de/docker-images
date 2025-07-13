@@ -1,2 +1,7 @@
-export { AbstractVersionFetcher } from './abstract-version-fetcher.class';
-export { NodeVersionFetcher } from './node-version-fetcher.class';
+export { AbstractImageVersionFetcher } from './abstract/abstract-image-version-fetcher.class';
+export { AbstractVersionFetcher } from './abstract/abstract-version-fetcher.class';
+export { AbstractVersionValidator } from './abstract/abstract-version-validator.class';
+export { NodeImageVersionFetcher } from './fetchers/node-image-version-fetcher.class';
+export { NodeVersionFetcher } from './fetchers/node-version-fetcher.class';
+export { NodeVersionValidator } from './validators/node-version-validator.class';
+export { VersionScheduleDataFetcher } from './fetchers/version-schedule-data-fetcher.class';

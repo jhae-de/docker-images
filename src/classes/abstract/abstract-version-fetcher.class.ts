@@ -1,5 +1,6 @@
-import assert from 'node:assert/strict';
-import type { WorkflowContextVersion } from '../types';
+import type { WorkflowContextLatestVersion, WorkflowContextRegularVersion, WorkflowContextVersion } from '../../types';
+import { fetchWithRetry } from '../../utilities';
+import { AbstractVersionValidator } from './abstract-version-validator.class';
 
 /**
  * The `AbstractVersionFetcher` class is an abstract base class for fetching version data.
@@ -17,7 +18,7 @@ export abstract class AbstractVersionFetcher<T = unknown> {
    *
    * @type {string | undefined}
    */
-  protected versionDataUrl?: string;
+  protected readonly versionDataUrl?: string;
 
   /**
    * The cached version data
@@ -29,9 +30,27 @@ export abstract class AbstractVersionFetcher<T = unknown> {
   protected cachedVersionData: T[] | null = null;
 
   /**
+   * Initializes the version fetcher.
+   *
+   * @param {AbstractVersionValidator} versionValidator - An instance of the version validator to validate versions
+   */
+  public constructor(protected readonly versionValidator: AbstractVersionValidator) {}
+
+  /**
+   * Returns a specific version based on the provided version string to be used in a workflow context.
+   *
+   * This method is intended to be overridden by subclasses to define how a specific version is fetched and returned.
+   *
+   * @param {string} version - The version string to fetch
+   *
+   * @returns {Promise<WorkflowContextRegularVersion>} A promise that resolves to the specific version
+   */
+  public abstract getVersion(version: string): Promise<WorkflowContextRegularVersion>;
+
+  /**
    * Returns the versions to be used in a workflow context.
    *
-   * This method is intended to be overridden by subclasses to define how the versions are fetched and processed.
+   * This method is intended to be overridden by subclasses to define how the versions are fetched and returned.
    *
    * @returns {Promise<WorkflowContextVersion[]>} A promise that resolves to an array of versions
    */
@@ -50,52 +69,10 @@ export abstract class AbstractVersionFetcher<T = unknown> {
    */
   protected async getVersionData(): Promise<T[]> {
     if (this.cachedVersionData === null) {
-      this.cachedVersionData = await this.fetchWithRetry((): Promise<T[]> => this.fetchVersionData());
+      this.cachedVersionData = await fetchWithRetry<T[]>((): Promise<T[]> => this.fetchVersionData());
     }
 
     return this.cachedVersionData;
-  }
-
-  /**
-   * Fetches data with retry logic.
-   *
-   * This method attempts to fetch data using the provided fetch function, retrying on failure up to a specified number
-   * of attempts with exponential backoff. It will throw an error if all attempts fail. The delay between attempts
-   * increases exponentially, up to a maximum of 30 seconds.
-   *
-   * @param {() => Promise<T>} fetchFn - The function that performs the fetch operation
-   * @param {number} [attempts=3] - The maximum number of attempts to fetch the data
-   * @param {number} [delay=1000] - The initial delay between attempts in milliseconds
-   *
-   * @returns {Promise<T>} A promise that resolves to the fetched data
-   *
-   * @throws {Error} If all fetch attempts fail, an error is thrown with the last encountered error message.
-   */
-  protected async fetchWithRetry<T>(fetchFn: () => Promise<T>, attempts: number = 3, delay: number = 1000): Promise<T> {
-    assert.ok(attempts >= 1, 'The number of attempts must be at least 1.');
-    assert.ok(delay >= 0, 'The delay must be a non-negative number.');
-
-    let lastError: Error | null = null;
-
-    for (let attempt: number = 1; attempt <= attempts; attempt++) {
-      try {
-        return await fetchFn();
-      } catch (error: unknown) {
-        lastError = !(error instanceof Error) ? new Error(String(error)) : error;
-        console.warn(`Fetch attempt ${attempt}/${attempts} failed: ${lastError.message}`);
-
-        if (attempt === attempts) {
-          continue;
-        }
-
-        await new Promise(
-          (resolve: (value: unknown) => void): void =>
-            void setTimeout(resolve, Math.min(delay * Math.pow(2, attempt - 1), 30000)),
-        );
-      }
-    }
-
-    throw lastError || new Error(`Failed to fetch data after ${attempts} attempts.`);
   }
 
   /**
@@ -136,5 +113,27 @@ export abstract class AbstractVersionFetcher<T = unknown> {
    */
   protected filterVersions(versions: T[], predicate: (version: T) => boolean): T[] {
     return versions.filter(predicate);
+  }
+
+  /**
+   * Adds a latest version object to an array of regular versions.
+   *
+   * This method appends a `latest` version object to the provided array of regular versions. The `latest` version
+   * object is defined with the properties: `version: 'latest'`, `image-version: 'latest'`, and `is-latest: true`.
+   *
+   * @param {WorkflowContextRegularVersion[]} regularVersions - The array of regular versions to which the latest
+   *   version object will be added
+   *
+   * @returns {WorkflowContextVersion[]} An array containing the original regular versions plus the latest version
+   *   object
+   */
+  protected addLatestVersionObject(regularVersions: WorkflowContextRegularVersion[]): WorkflowContextVersion[] {
+    const latestVersion: WorkflowContextLatestVersion = {
+      'version': 'latest',
+      'image-version': 'latest',
+      'is-latest': true,
+    };
+
+    return [...regularVersions, latestVersion];
   }
 }

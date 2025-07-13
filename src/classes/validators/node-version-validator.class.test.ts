@@ -1,13 +1,15 @@
-import type { WorkflowContextLatestVersion, WorkflowContextRegularVersion, WorkflowContextVersion } from '../types';
-import { NodeVersionFetcher } from './node-version-fetcher.class';
+import 'reflect-metadata';
+import { container } from 'tsyringe';
+import type { WorkflowContextLatestVersion, WorkflowContextRegularVersion } from '../../types';
+import { NodeVersionValidator } from './node-version-validator.class';
 
-class TestNodeVersionFetcher extends NodeVersionFetcher {
-  public validateVersions(versions: WorkflowContextVersion[]): void {
-    super.validateVersions(versions);
-  }
-}
+type RegularVersionTestCase = {
+  name: string;
+  version: WorkflowContextRegularVersion;
+  expected: boolean;
+};
 
-const fetcher: TestNodeVersionFetcher = new TestNodeVersionFetcher();
+const validator: NodeVersionValidator = container.resolve(NodeVersionValidator);
 
 function getValidRegularVersion(version: string, codeName: string, isLatest: boolean): WorkflowContextRegularVersion {
   return {
@@ -27,10 +29,10 @@ function getValidLatestVersion(): WorkflowContextLatestVersion {
   };
 }
 
-describe('NodeVersionFetcher.validateVersions', (): void => {
+describe('NodeVersionValidator.validateVersions', (): void => {
   it('does not throw for valid versions', (): void => {
     expect((): void =>
-      fetcher.validateVersions([
+      validator.validateVersions([
         getValidRegularVersion('18.17.1', 'Hydrogen', false),
         getValidRegularVersion('20.10.0', 'Iron', true),
         getValidLatestVersion(),
@@ -39,7 +41,7 @@ describe('NodeVersionFetcher.validateVersions', (): void => {
   });
 
   it('throws if versions array is too short', (): void => {
-    expect((): void => fetcher.validateVersions([getValidRegularVersion('18.17.1', 'Hydrogen', true)])).toThrow(
+    expect((): void => validator.validateVersions([getValidRegularVersion('18.17.1', 'Hydrogen', true)])).toThrow(
       'Versions array must contain at least two elements.',
     );
   });
@@ -58,14 +60,14 @@ describe('NodeVersionFetcher.validateVersions', (): void => {
 
     invalidRegularVersions.forEach((invalidRegularVersion: WorkflowContextRegularVersion): void => {
       expect((): void =>
-        fetcher.validateVersions([validRegularVersion, invalidRegularVersion, getValidLatestVersion()]),
+        validator.validateVersions([validRegularVersion, invalidRegularVersion, getValidLatestVersion()]),
       ).toThrow(`Invalid regular version object: ${JSON.stringify(invalidRegularVersion)}`);
     });
   });
 
   it('throws if latest version is missing', (): void => {
     expect((): void =>
-      fetcher.validateVersions([
+      validator.validateVersions([
         getValidRegularVersion('18.17.1', 'Hydrogen', false),
         getValidRegularVersion('20.10.0', 'Iron', true),
       ]),
@@ -74,7 +76,7 @@ describe('NodeVersionFetcher.validateVersions', (): void => {
 
   it('throws if more than one latest version object is present', (): void => {
     expect((): void =>
-      fetcher.validateVersions([
+      validator.validateVersions([
         getValidRegularVersion('18.17.1', 'Hydrogen', true),
         getValidLatestVersion(),
         getValidLatestVersion(),
@@ -90,13 +92,13 @@ describe('NodeVersionFetcher.validateVersions', (): void => {
     } as unknown as WorkflowContextLatestVersion;
 
     expect((): void =>
-      fetcher.validateVersions([getValidRegularVersion('18.17.1', 'Hydrogen', true), invalidLatestVersion]),
+      validator.validateVersions([getValidRegularVersion('18.17.1', 'Hydrogen', true), invalidLatestVersion]),
     ).toThrow(`Invalid latest version object: ${JSON.stringify(invalidLatestVersion)}`);
   });
 
   it('throws for unsorted regular versions', (): void => {
     expect((): void =>
-      fetcher.validateVersions([
+      validator.validateVersions([
         getValidRegularVersion('20.10.0', 'Iron', true),
         getValidRegularVersion('18.17.1', 'Hydrogen', false),
         getValidLatestVersion(),
@@ -106,7 +108,7 @@ describe('NodeVersionFetcher.validateVersions', (): void => {
 
   it('throws if the last regular version does not have is-latest: true', (): void => {
     expect((): void =>
-      fetcher.validateVersions([
+      validator.validateVersions([
         getValidRegularVersion('18.17.1', 'Hydrogen', false),
         getValidRegularVersion('20.10.0', 'Iron', false),
         getValidLatestVersion(),
@@ -116,7 +118,51 @@ describe('NodeVersionFetcher.validateVersions', (): void => {
 
   it('throws if latest version is not last', (): void => {
     expect((): void =>
-      fetcher.validateVersions([getValidLatestVersion(), getValidRegularVersion('18.17.1', 'Hydrogen', true)]),
+      validator.validateVersions([getValidLatestVersion(), getValidRegularVersion('18.17.1', 'Hydrogen', true)]),
     ).toThrow('Latest version object must be last in the array.');
+  });
+});
+
+describe('NodeVersionValidator.isValidRegularVersion', (): void => {
+  const regularVersionTestCases: RegularVersionTestCase[] = [
+    {
+      name: 'returns true for a valid regular version',
+      version: getValidRegularVersion('18.17.1', 'Hydrogen', false),
+      expected: true,
+    },
+    {
+      name: 'returns false for invalid version format',
+      version: { ...getValidRegularVersion('18.17.1', 'Hydrogen', false), version: '18.17' },
+      expected: false,
+    },
+    {
+      name: 'returns false for invalid image-version format',
+      version: { ...getValidRegularVersion('18.17.1', 'Hydrogen', false), 'image-version': 'eighteen' },
+      expected: false,
+    },
+    {
+      name: 'returns false for invalid image-name format',
+      version: { ...getValidRegularVersion('18.17.1', 'Hydrogen', false), 'image-name': 'Node 18.17.1 (Hydrogen)' },
+      expected: false,
+    },
+    {
+      name: 'returns false for mismatched image-code-name',
+      version: { ...getValidRegularVersion('18.17.1', 'Hydrogen', false), 'image-code-name': 'iron' },
+      expected: false,
+    },
+    {
+      name: 'returns false for invalid image-code-name format',
+      version: { ...getValidRegularVersion('18.17.1', 'Hydrogen', false), 'image-code-name': 'Hydrogen' },
+      expected: false,
+    },
+    {
+      name: 'returns false if is-latest is not boolean',
+      version: { ...getValidRegularVersion('18.17.1', 'Hydrogen', false), 'is-latest': 'yes' as unknown as boolean },
+      expected: false,
+    },
+  ];
+
+  it.each(regularVersionTestCases)('$name', (testCase: RegularVersionTestCase): void => {
+    expect(validator.isValidRegularVersion(testCase.version)).toBe(testCase.expected);
   });
 });
