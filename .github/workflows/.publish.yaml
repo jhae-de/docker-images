@@ -27,12 +27,9 @@ on:
       image-version:
         type: string
         required: true
-      image-code-name:
+      image-tags:
         type: string
-        required: false
-      release-version:
-        type: string
-        required: false
+        required: true
       is-latest:
         type: boolean
         required: false
@@ -76,13 +73,8 @@ jobs:
             org.opencontainers.image.description=${{ inputs.image-description }}
             org.opencontainers.image.version=${{ inputs.image-version }}
           tags: |
-            type=raw,value=${{ inputs.image-code-name == '' && inputs.image-version || '' }}
-            type=raw,value=${{ inputs.image-code-name == '' && inputs.image-version || '' }}${{ (inputs.image-code-name == '' && inputs.release-version) && format('-{0}', inputs.release-version) || '' }}
-            type=raw,value=${{ inputs.image-version }}${{ inputs.image-code-name && format('-{0}', inputs.image-code-name) || '' }}
-            type=raw,value=${{ inputs.image-version }}${{ inputs.image-code-name && format('-{0}', inputs.image-code-name) || '' }}${{ inputs.release-version && format('-{0}', inputs.release-version) || '' }}
-            type=raw,value=${{ inputs.image-code-name }}
-            type=raw,value=${{ inputs.image-code-name }}${{ (inputs.image-code-name  && inputs.release-version) && format('-{0}', inputs.release-version) || '' }}
-            type=raw,value=${{ inputs.is-latest && 'latest' || '' }}
+            ${{ inputs.image-tags }}
+            ${{ inputs.is-latest && 'type=raw,value=latest' || '' }}
 
       - name: Build and push image
         uses: docker/build-push-action@v6

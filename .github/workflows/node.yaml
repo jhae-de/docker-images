@@ -17,17 +17,15 @@ on:
         description: Node version
         type: string
         required: true
-        default: '22.14.0'
+        default: '22.11.0'
       nvm-version:
         description: NVM version
         type: string
         required: true
         default: '0.39.7'
-      is-latest:
-        description: Latest
-        type: boolean
-        required: true
-        default: false
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   workflow-data:
@@ -35,15 +33,41 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       ubuntu-version: ${{ steps.workflow-data.outputs.ubuntu-version }}
-      image-version: ${{ steps.workflow-data.outputs.image-version }}
+      node-version: ${{ steps.workflow-data.outputs.node-version }}
+      node-image-name: ${{ steps.workflow-data.outputs.node-image-name }}
+      node-image-version: ${{ steps.workflow-data.outputs.node-image-version }}
+      node-is-latest: ${{ steps.workflow-data.outputs.node-is-latest }}
       image-code-name: ${{ steps.workflow-data.outputs.image-code-name }}
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm clean-install
+
       - name: Set workflow data
         id: workflow-data
         run: |
           echo "ubuntu-version=$(echo "${{ inputs.ubuntu-version }}" | cut -d' ' -f1)" >> $GITHUB_OUTPUT
-          echo "image-version=$(echo "${{ inputs.node-version }}" | cut -d. -f1)" >> $GITHUB_OUTPUT
+
+          node_version_object=$(./bin/fetch-versions.ts Node ${{ inputs.node-version }})
+
+          node_version=$(node -e "console.log(JSON.parse(process.argv[1]).version)" "$node_version_object")
+          node_image_name=$(node -e "console.log(JSON.parse(process.argv[1])['image-name'])" "$node_version_object")
+          node_image_version=$(node -e "console.log(JSON.parse(process.argv[1])['image-version'])" "$node_version_object")
+          node_is_latest=$(node -e "console.log(JSON.parse(process.argv[1])['is-latest'])" "$node_version_object")
+
+          echo "node-version=$node_version" >> $GITHUB_OUTPUT
+          echo "node-image-name=$node_image_name" >> $GITHUB_OUTPUT
+          echo "node-image-version=$node_image_version" >> $GITHUB_OUTPUT
+          echo "node-is-latest=$node_is_latest" >> $GITHUB_OUTPUT
+
           if [ "${{ inputs.ubuntu-version }}" == "24.04 LTS (Noble Numbat)" ]; then
             echo "image-code-name=noble" >> $GITHUB_OUTPUT
           elif [ "${{ inputs.ubuntu-version }}" == "22.04 LTS (Jammy Jellyfish)" ]; then
@@ -59,14 +83,20 @@ jobs:
       dockerfile: ./images/node/Dockerfile
       build-args: |
         UBUNTU_VERSION=${{ needs.workflow-data.outputs.ubuntu-version }}
-        NODE_VERSION=${{ inputs.node-version }}
+        NODE_VERSION=${{ needs.workflow-data.outputs.node-version }}
         NVM_VERSION=${{ inputs.nvm-version }}
       image-name: node
       image-title: Node
-      image-description: Node ${{ inputs.node-version }} on ${{ inputs.ubuntu-version != 'latest' && format('Ubuntu {0]', inputs.ubuntu-version) || 'Ubuntu LTS (latest)' }}
-      image-version: ${{ needs.workflow-data.outputs.image-version }}
-      image-code-name: ${{ needs.workflow-data.outputs.image-code-name || '' }}
-      is-latest: ${{ inputs.is-latest }}
+      image-description: ${{ needs.workflow-data.outputs.node-image-name }} on ${{ inputs.ubuntu-version != 'latest' && format('Ubuntu {0}', inputs.ubuntu-version) || 'Ubuntu LTS (latest)' }}
+      image-version: ${{ needs.workflow-data.outputs.node-image-version }}
+      image-tags: |
+        # Tag: {image-version}
+        type=raw,value=${{ needs.workflow-data.outputs.node-image-version }}
+        # Tag: {image-version}-{image-code-name}
+        type=raw,value=${{ needs.workflow-data.outputs.node-image-version }}${{ needs.workflow-data.outputs.image-code-name && format('-{0}', needs.workflow-data.outputs.image-code-name) || '' }}
+        # Tag: {image-code-name}
+        type=raw,value=${{ needs.workflow-data.outputs.node-is-latest && needs.workflow-data.outputs.image-code-name || '' }}
+      is-latest: ${{ needs.workflow-data.outputs.node-is-latest && inputs.ubuntu-version == 'latest' }}
     permissions:
       contents: read
       packages: write

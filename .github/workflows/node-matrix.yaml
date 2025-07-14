@@ -9,14 +9,42 @@ on:
         type: string
         required: true
         default: '0.39.7'
+  schedule:
+    - cron: '0 0 1 * *'
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
+  workflow-data:
+    name: Set workflow data
+    runs-on: ubuntu-latest
+    outputs:
+      node-versions: ${{ steps.workflow-data.outputs.node-versions }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm clean-install
+
+      - name: Set workflow data
+        id: workflow-data
+        run: echo "node-versions=$(./bin/fetch-versions.ts Node | tr -d '\n')" >> $GITHUB_OUTPUT
+
   publish:
     name: Publish Node
+    needs: workflow-data
     uses: ./.github/workflows/.publish.yaml
     strategy:
       matrix:
-        node: ${{ fromJSON(vars.NODE_VERSIONS) }}
+        node: ${{ fromJSON(needs.workflow-data.outputs.node-versions) }}
         ubuntu: ${{ fromJSON(vars.UBUNTU_VERSIONS) }}
       max-parallel: 1
     with:
@@ -30,9 +58,15 @@ jobs:
       image-title: Node
       image-description: ${{ matrix.node.image-name }} on ${{ matrix.ubuntu.image-name || 'Ubuntu LTS (latest)' }}
       image-version: ${{ matrix.node.image-version }}
-      image-code-name: ${{ matrix.ubuntu.image-code-name || '' }}
-      is-latest: ${{ (matrix.node.is-latest && matrix.ubuntu.version == 'latest') && true || false }}
-      is-skipped: ${{ matrix.node.version == 'latest' && true || false }}
+      image-tags: |
+        # Tag: {image-version}
+        type=raw,value=${{ matrix.node.image-version }}
+        # Tag: {image-version}-{image-code-name}
+        type=raw,value=${{ matrix.node.image-version }}${{ matrix.ubuntu.image-code-name && format('-{0}', matrix.ubuntu.image-code-name) || '' }}
+        # Tag: {image-code-name}
+        type=raw,value=${{ matrix.node.is-latest && matrix.ubuntu.image-code-name || '' }}
+      is-latest: ${{ matrix.node.is-latest && matrix.ubuntu.version == 'latest' }}
+      is-skipped: ${{ matrix.node.version == 'latest' }}
     permissions:
       contents: read
       packages: write
