@@ -1,6 +1,8 @@
 export { AbstractImageVersionFetcher } from './abstract/abstract-image-version-fetcher.class';
 export { AbstractVersionFetcher } from './abstract/abstract-version-fetcher.class';
 export { AbstractVersionValidator } from './abstract/abstract-version-validator.class';
+export { JekyllVersionFetcher } from './fetchers/jekyll-version-fetcher.class';
+export { JekyllVersionValidator } from './validators/jekyll-version-validator.class';
 export { NodeImageVersionFetcher } from './fetchers/node-image-version-fetcher.class';
 export { NodeVersionFetcher } from './fetchers/node-version-fetcher.class';
 export { NodeVersionValidator } from './validators/node-version-validator.class';

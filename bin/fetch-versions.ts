@@ -3,7 +3,12 @@
 import 'reflect-metadata';
 import process from 'node:process';
 import { container } from 'tsyringe';
-import { AbstractVersionFetcher, AbstractVersionValidator, NodeVersionFetcher } from '../src/classes';
+import {
+  AbstractVersionFetcher,
+  AbstractVersionValidator,
+  JekyllVersionFetcher,
+  NodeVersionFetcher,
+} from '../src/classes';
 import { VersionFetcherType } from '../src/enums';
 import type { WorkflowContextRegularVersion, WorkflowContextVersion } from '../src/types';
 
@@ -19,6 +24,7 @@ if (versionFetcherType === undefined) {
 }
 
 const VersionFetcher: VersionFetcherClass = {
+  [VersionFetcherType.Jekyll]: JekyllVersionFetcher,
   [VersionFetcherType.Node]: NodeVersionFetcher,
 }[versionFetcherType];
 

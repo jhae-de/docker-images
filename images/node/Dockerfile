@@ -2,11 +2,10 @@ ARG UBUNTU_VERSION=latest
 
 FROM ghcr.io/jhae-de/ubuntu:${UBUNTU_VERSION}
 
-ARG NODE_VERSION=22.14.0
+ARG NODE_VERSION=lts/*
 ARG NVM_VERSION=0.39.7
 
 ENV NVM_DIR=/usr/local/nvm
-ENV PATH=${PATH}:${NVM_DIR}/versions/node/v${NODE_VERSION}/bin
 
 USER root
 
@@ -19,6 +18,8 @@ RUN apt-get update; \
     nvm install ${NODE_VERSION}; \
     nvm alias default ${NODE_VERSION}; \
     nvm use default; \
+    echo "export PATH=\${PATH}:${NVM_DIR}/versions/node/$(nvm current)/bin" > /etc/profile.d/00-export-node-path.sh; \
+    echo "source /etc/profile.d/00-export-node-path.sh" >> ${DOCKER_HOMEDIR}/.bashrc; \
     apt-get --yes purge curl; \
     apt-get --yes autoremove; \
     apt-get clean; \
